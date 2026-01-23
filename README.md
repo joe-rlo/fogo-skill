@@ -14,9 +14,30 @@ This skill extends Claude Code with specialized knowledge for Fogo development, 
 
 ## Installation
 
+### Claude.ai
+
 1. Download the latest `fogo.skill` from [Releases](../../releases)
-2. In Claude Code, go to **Settings → Skills**
-3. Click **Add Skill** and select the downloaded file
+2. Go to **Settings → Capabilities → Skills**
+3. Click **Upload skill** and select the downloaded file
+
+### Claude Code
+
+Copy the `fogo` folder to your personal skills directory:
+
+```bash
+# Clone this repo
+git clone https://github.com/joe-rlo/fogo-skill.git
+
+# Copy to Claude Code skills folder
+cp -r fogo-skill/fogo ~/.claude/skills/
+```
+
+Or install directly:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r fogo ~/.claude/skills/
+```
 
 ## Usage
 
