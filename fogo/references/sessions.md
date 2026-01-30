@@ -46,7 +46,7 @@ Package: `@fogo/sessions-sdk-react`
 | `enableUnlimited` | `boolean` | No | Allow unlimited session spending. |
 | `defaultAddressLookupTableAddress` | `string` | No | Address lookup table for tx optimization. |
 
-**⚠️ IMPORTANT:** Do NOT use `sponsor`, `paymasterUrl`, or `endpoint` — these props do not exist in the published SDK. Use `network`, `domain`, `rpc`, and `paymaster` only.
+**⚠️ IMPORTANT:** Do NOT use `sponsor`, `paymasterUrl`, or `endpoint` — these props do not exist in the published SDK. Use `network`, `domain`, `rpc`, and `paymaster` only. (Note: The official docs at `docs.fogo.io` still show the old props — trust the SDK, not the docs page.)
 
 ### Reference Implementation
 
@@ -181,6 +181,13 @@ constraint = { EqualTo = [{ U8 = 44 }] }  # Match first byte of discriminator
 - `include` — account at index must match one of these
 - `exclude` — account at index must not match any of these
 - Data constraints: `EqualTo`, `LessThan`, `GreaterThan`, `Neq` — all take `{type = value}` arrays
+
+**⚠️ CRITICAL — Paymaster matches TOP-LEVEL instructions only:**
+The paymaster does NOT inspect inner CPI (Cross-Program Invocation) calls. For Anchor programs:
+- Account creation (system program) happens via internal CPI — do NOT add a separate system program instruction to your TOML
+- Each variation should only list YOUR program's instruction
+- Example: `InitializeGame` creates a PDA via Anchor's CPI to system program, but the transaction has only ONE top-level instruction (your program). The TOML must match that single instruction, not two.
+- This is the #1 gotcha for Anchor programs using the paymaster
 
 **Anchor discriminators:** First 8 bytes of `SHA256("global:<function_name>")`. Use the first byte for a simple `EqualTo` constraint:
 
@@ -447,7 +454,11 @@ pub const PROGRAM_SIGNER_SEED: &[u8] = b"program_signer";
 **Error**: "domain is not registered with the paymaster"
 **Fix**: Domain in `FogoSessionProvider` must exactly match what's registered. In dev, use a registered domain like `sessions-example.fogo.io`.
 
-### 5. Native FOGO in Sessions
+### 5. Paymaster TOML Demands Extra Instructions (Anchor CPI)
+**Error**: "Transaction does not match any allowed variations"
+**Fix**: The paymaster only matches **top-level instructions**. Anchor handles account creation (system program) via internal CPI — it's NOT a separate instruction in the transaction. Remove any system program instruction requirements from your TOML. Each variation should only list your program's instruction.
+
+### 6. Native FOGO in Sessions
 **Error**: Sessions don't work with FOGO
 **Fix**: Use Wrapped SOL (`NATIVE_MINT` = `So11111111111111111111111111111111111111112`), not native FOGO.
 

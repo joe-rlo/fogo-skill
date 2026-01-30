@@ -1,6 +1,6 @@
 ---
 name: fogo
-description: "Build and deploy applications on Fogo, a high-performance Layer 1 blockchain with full Solana (SVM) compatibility. Use when working with Fogo blockchain development including: (1) Deploying Solana programs to Fogo, (2) Configuring Anchor or Solana CLI for Fogo, (3) Integrating Fogo Sessions for gasless UX, (4) Using Fogo RPC endpoints, (5) Working with FOGO/fUSD tokens, (6) Connecting to testnet/mainnet, or any Fogo-related blockchain development tasks."
+description: "Build and deploy applications on Fogo, a high-performance Layer 1 blockchain with full Solana (SVM) compatibility. Use when working with Fogo blockchain development including: (1) Deploying Solana programs to Fogo, (2) Configuring Anchor or Solana CLI for Fogo, (3) Integrating Fogo Sessions for gasless UX, (4) Using Fogo RPC endpoints, (5) Working with FOGO tokens, (6) Connecting to testnet/mainnet, or any Fogo-related blockchain development tasks."
 ---
 
 # Fogo Development
@@ -20,8 +20,7 @@ Testnet: https://testnet.fogo.io
 
 | Token | Mint Address |
 |-------|-------------|
-| FOGO SPL | `So11111111111111111111111111111111111111112` |
-| fUSD | `fUSDNGgHkZfwckbr5RLLvRbvqvRcTLdH9hcHJiq4jry` |
+| FOGO SPL (Wrapped) | `So11111111111111111111111111111111111111112` |
 
 ### Resources
 
@@ -109,7 +108,12 @@ import { NATIVE_MINT } from '@solana/spl-token';
 
 **Do NOT use** `sponsor`, `paymasterUrl`, or `endpoint` props — these are outdated/non-existent in the published SDK. Use `network`, `domain`, `rpc`, and `paymaster` only.
 
-Reference implementation: https://github.com/fogo-foundation/fogo-sessions/blob/main/apps/sessions-demo/src/config/server.ts
+> **⚠️ NOTE:** The official docs at `docs.fogo.io/user-guides/integrating-fogo-sessions.html` still show the old props (`sponsor`, `paymasterUrl`, `endpoint`). The published `@fogo/sessions-sdk-react` package uses `network`, `domain`, `rpc`, `paymaster`. Trust the SDK, not the docs page.
+
+Reference implementations:
+- NextJS: https://github.com/fogo-foundation/sessions-example
+- Vite: https://github.com/fogo-foundation/sessions-example-vite
+- Sessions monorepo: https://github.com/fogo-foundation/fogo-sessions
 
 ### Quick Setup (Anchor Program)
 
@@ -245,6 +249,11 @@ data_type = "U8"
 constraint = { EqualTo = [{ U8 = 44 }] }  # First byte of Anchor discriminator
 ```
 
+**⚠️ Paymaster matches TOP-LEVEL instructions only.** It does NOT inspect inner CPI calls. For Anchor programs, this means:
+- The system program (account creation) is called via CPI internally — do NOT add a separate system program instruction in your TOML
+- Each variation should only list your program's instruction, not the system program
+- This is the #1 gotcha for Anchor programs using sessions
+
 **Anchor discriminators:** First 8 bytes of `SHA256("global:<function_name>")`. Use the first byte for the `EqualTo` constraint.
 
 ```python
@@ -364,11 +373,8 @@ solana-keygen pubkey ~/fogo-wallet.json
 # Native FOGO
 solana transfer <DEST_ADDRESS> <AMOUNT>
 
-# FOGO SPL tokens
+# FOGO SPL tokens (Wrapped)
 spl-token transfer So11111111111111111111111111111111111111112 <DEST_ADDRESS> <AMOUNT>
-
-# fUSD
-spl-token transfer fUSDNGgHkZfwckbr5RLLvRbvqvRcTLdH9hcHJiq4jry <DEST_ADDRESS> <AMOUNT>
 ```
 
 ### Get Testnet Tokens
@@ -376,7 +382,6 @@ spl-token transfer fUSDNGgHkZfwckbr5RLLvRbvqvRcTLdH9hcHJiq4jry <DEST_ADDRESS> <A
 Visit https://faucet.fogo.io and select:
 - **FOGO (native)**: For transaction fees (developers)
 - **FOGO**: SPL tokens for Fogo Sessions users
-- **fUSD**: Stablecoin SPL tokens
 
 ## Ecosystem Integrations
 

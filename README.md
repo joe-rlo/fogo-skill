@@ -9,7 +9,7 @@ This skill extends Claude Code with specialized knowledge for Fogo development, 
 - 🚀 Deploying Solana programs to Fogo (full SVM compatibility)
 - ⚡ Configuring Solana CLI and Anchor for Fogo endpoints
 - 🔐 Integrating Fogo Sessions for gasless, no-approve UX
-- 🪙 Working with FOGO and fUSD tokens
+- 🪙 Working with FOGO tokens
 - 🌐 Connecting to testnet and mainnet RPCs
 
 ## Installation
